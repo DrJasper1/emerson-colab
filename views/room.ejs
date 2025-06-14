@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild Cherry Cams - <%= roomName %></title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container room-container">
+        <header>
+            <h1>🍒 <%= roomName %> 🍒 (<span id="userCount">0</span>/<span id="roomCapacityDisplay"><%= roomCapacity %></span>)</h1>
+            <a href="/" class="leave-room-btn">Leave Room</a>
+        </header>
+
+        <div class="main-content">
+            <div class="video-chat-wrapper">
+                <div class="video-section">
+                    <h2>🎬 Videos 🍒</h2>
+                    <div id="videoGrid" class="video-grid">
+                        <div class="video-participant self-view" id="localVideoOuterContainer">
+                            <video id="localVideo" autoplay muted playsinline></video>
+                            <button class="fullscreen-btn" id="localFullscreenBtn" title="Toggle Fullscreen">🖼️</button>
+                            <p><span id="localDisplayName">Your Name</span> (You)</p>
+                        </div>
+                    </div>
+                    <div class="join-options" style="margin-bottom: 10px; text-align: center;">
+                        <input type="checkbox" id="joinWithVideoOff" style="margin-right: 5px;">
+                        <label for="joinWithVideoOff">Join with camera off</label>
+                    </div>
+                    <div class="media-controls">
+                        <button id="toggleAudioBtn" title="Toggle Microphone">Mute Mic</button>
+                        <button id="toggleVideoBtn" title="Toggle Camera">Stop Video</button>
+                        <select id="cameraSelect" title="Select Camera"></select> <!-- Camera selection dropdown -->
+                    </div>
+                </div>
+
+                <div class="chat-section">
+                    <h2>💬 Chat 🍒</h2>
+                    <div id="pinnedPaymentInfoDisplay" style="display: none; padding: 10px; margin-bottom: 10px; background-color: var(--bg-light); border: 1px solid var(--border-playful); border-radius: 5px;">
+                        <!-- Pinned payment info will be displayed here -->
+                    </div>
+                    <div id="chatMessages" class="chat-messages" role="log" aria-live="polite"></div>
+                    <div class="chat-input" style="position: relative;"> <!-- Added position relative for emoji panel -->
+                        <button id="emojiPickerBtn" aria-label="Open emoji picker" style="margin-right: 5px; background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px;">😃</button>
+                        <input type="text" id="chatInput" placeholder="Type a message..." aria-label="Chat message input" style="flex-grow: 1;">
+                        <div id="emojiPanel" class="emoji-panel" style="display: none; position: absolute; bottom: 100%; left: 0; background-color: var(--bg-container); border: 1px solid var(--border-playful); border-radius: 8px; padding: 10px; box-shadow: 0 2px 10px var(--shadow-playful); z-index: 1000; max-height: 200px; overflow-y: auto;">
+                            <!-- Emojis will be populated here by JavaScript -->
+                        </div>
+                        <button id="sendChatBtn">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="participants-section">
+                <h2>👥 Participants 🍒 (<span id="participantCount">0</span>)</h2>
+                <ul id="userList"></ul>
+                <div id="hostControls" style="display: none;">
+                    <h3>Host Controls</h3>
+                    <div>
+                        <label for="newCapacityInput">Set Room Capacity (2-10):</label>
+                        <input type="number" id="newCapacityInput" min="2" max="10" value="<%= roomCapacity %>" aria-label="New room capacity">
+                        <button id="changeCapacityBtn">Set</button>
+                    </div>
+                    <p>Select a user from list for actions:</p>
+                    <button id="kickUserBtn" class="host-action-btn" disabled>Kick User</button>
+                    <button id="banUserBtn" class="host-action-btn" disabled>Ban User (IP)</button>
+
+                    <div id="hostPaymentInfoSection" style="margin-top: 15px;">
+                        <h4>Pin Payment Info in Chat:</h4>
+                        <div>
+                            <label for="cashappId">CashApp ($cashtag):</label>
+                            <input type="text" id="cashappId" placeholder="$yourtag">
+                        </div>
+                        <div>
+                            <label for="paypalLink">PayPal (paypal.me/link):</label>
+                            <input type="text" id="paypalLink" placeholder="paypal.me/yourname">
+                        </div>
+                        <div>
+                            <label for="venmoId">Venmo (@username):</label>
+                            <input type="text" id="venmoId" placeholder="@yourusername">
+                        </div>
+                        <div>
+                            <label for="cryptoAddress">Crypto (e.g., BTC Address):</label>
+                            <input type="text" id="cryptoAddress" placeholder="Your BTC/ETH/etc. Address">
+                        </div>
+                        <button id="savePaymentInfoBtn" style="margin-top: 10px;">Save/Pin Info</button>
+                        <button id="clearPaymentInfoBtn" style="margin-top: 10px;">Clear Pinned Info</button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End room-layout-wrapper -->
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script>
+        const ROOM_ID = "<%= roomId %>";
+        const INITIAL_DISPLAY_NAME = "<%= displayName %>"; // displayName passed from server
+        const ROOM_NAME = "<%= roomName %>";
+        let IS_HOST = false; 
+        let MY_PEER_ID = null;
+    </script>
+    <script src="/room_script.js"></script>
+</body>
+</html>

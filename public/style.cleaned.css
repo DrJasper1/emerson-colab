@@ -1,0 +1,959 @@
+/* === Root Variables === */
+:root {
+  --bg-main: #FDF6F0; /* Vanilla */
+  --text-primary: #3A3A3A; /* Charcoal */
+  --text-secondary: #5D5D5D; /* Soft Dark Grey */
+  --text-light: #757575; /* Medium Grey */
+  --accent-color: #FF69B4; /* Hot Pink */
+  --accent-hover: #FF85C1; /* Lighter Pink */
+  --accent-shadow: rgba(255, 105, 180, 0.3);
+  --border-playful: #FFC0CB; /* Pink Border */
+  --bg-container: #FFFFFF;
+  --bg-container-alt: #F8F8F8; /* Slightly Off-White */
+  --button-bg: #4CAF50; /* Green */
+  --button-text: white;
+  --button-hover-bg: #45a049; /* Darker Green */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --error-red: #D70040; /* Crimson Red */
+  --link-blue: #007BFF; /* Standard Blue */
+  --font-main: 'Montserrat', sans-serif;
+  --font-display: 'Pacifico', cursive;
+  --brand-cherry: #D70040; /* Example: Crimson Red */
+  --brand-mint: #A2E4B8;   /* Example: Light Mint Green */
+  --accent-pink: #F06292; /* A playful pink */
+  --accent-sky-blue: #4FC3F7; /* A clear sky blue */
+  --accent-mint-green: #81C784; /* A soft mint green */
+  --highlight-red: #D70040; /* Crimson Red for errors or important highlights */
+  --text-chat-pink: #AD1457; /* Deeper pink for chat text for readability */
+  --light-text: #E0E0E0; /* For text on dark backgrounds */
+}
+
+/* === Base Styles === */
+html {
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: var(--font-main);
+  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--accent-pink);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 2.5em;
+  text-align: center;
+  margin-bottom: 0.5em;
+  color: var(--brand-cherry);
+}
+
+a {
+  color: var(--link-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button, .join-button, .leave-room-btn, .media-controls button, .host-action-btn {
+  font-family: var(--font-main);
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px; /* Pill shape */
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+button:hover, .join-button:hover, .leave-room-btn:hover, .media-controls button:hover, .host-action-btn:hover {
+  background-color: var(--button-hover-bg);
+  transform: translateY(-1px);
+}
+
+button:active, .join-button:active, .leave-room-btn:active, .media-controls button:active, .host-action-btn:active {
+  transform: translateY(0);
+}
+
+input[type="text"], input[type="password"], input[type="number"], select {
+  font-family: var(--font-main);
+  padding: 10px;
+  border: 1px solid var(--border-playful);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 1em;
+  width: 100%;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-shadow);
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* === Main Layout === */
+.container {
+  max-width: 1300px; /* Increased max-width */
+  margin: 20px auto; /* Reduced top/bottom margin */
+  padding: 25px;
+  background-color: var(--bg-container);
+  border-radius: 15px;
+  box-shadow: 0 8px 25px var(--shadow-color);
+  flex-grow: 1; /* Allow container to grow and push footer down */
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  gap: 20px;
+}
+
+.video-chat-wrapper {
+  flex: 3; /* Takes more space */
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-container-alt);
+  padding: 20px;
+  border-radius: 12px;
+  min-width: 0; /* Prevent overflow issues in flex children */
+}
+
+.participants-section {
+  flex: 1; /* Takes less space */
+  min-width: 280px; /* Slightly wider */
+  max-width: 350px;
+  background-color: var(--bg-container-alt);
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-panel {
+  margin-top: 20px; /* Space above chat if it's separate */
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  max-height: 400px; /* Max height for chat panel */
+}
+
+/* Emoji Picker Styles */
+#emojiPickerContainer {
+    position: relative; /* For absolute positioning of picker */
+}
+
+#emojiBtn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 5px;
+    color: var(--accent-pink);
+}
+
+#emojiPicker {
+    position: absolute;
+    bottom: 100%; /* Position above the button */
+    left: 0;
+    border: 1px solid #ccc;
+    background-color: white;
+    z-index: 1000;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#emojiPicker span {
+    cursor: pointer;
+    padding: 5px;
+    text-align: center;
+    border-radius: 4px;
+}
+
+#emojiPicker span:hover {
+    background-color: #eee;
+}
+
+/* === Room Page Specific Styles === */
+.room-container header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-playful);
+}
+
+.room-container header h1 {
+  font-size: 2em;
+  color: var(--brand-cherry);
+  text-align: left;
+}
+
+#videoGrid {
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 10px;
+  flex-grow: 1;
+  background-color: #e0e0e0; /* Light grey background for the grid area */
+  border-radius: 8px;
+  min-height: 300px; /* Ensure grid has some height */
+}
+
+.video-participant, #localVideoOuterContainer {
+  background-color: #2c2c2c; /* Darker background for video elements */
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  display: flex; /* For centering avatar/video */
+  flex-direction: column; /* Stack video/avatar and name tag */
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 16/9; /* Maintain aspect ratio */
+  min-height: 150px; /* Minimum height for video elements */
+}
+
+.video-participant video, #localVideoOuterContainer video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover; /* Cover the area, may crop */
+  background-color: #1a1a1a; /* Fallback if video not loaded */
+}
+
+.media-controls {
+  text-align: center;
+  padding: 15px 0;
+  background-color: rgba(255,255,255,0.8);
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.media-controls button {
+  margin: 0 8px;
+  background-color: var(--accent-sky-blue);
+  padding: 10px 15px;
+}
+
+.media-controls button:hover {
+  background-color: #29B6F6; /* Slightly darker sky blue */
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  min-height: 100px; /* Ensure chat messages area has some height */
+}
+
+.chat-messages div {
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(240, 98, 146, 0.3);
+  color: var(--text-chat-pink);
+  font-size: 1.05em;
+}
+
+.chat-messages div:last-child {
+  border-bottom: none;
+}
+
+.chat-messages strong {
+  color: var(--accent-pink);
+  font-weight: 500;
+}
+
+.chat-input {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.chat-input input[type="text"] {
+  flex-grow: 1;
+  margin-right: 10px;
+  margin-bottom: 0; 
+}
+
+.chat-input button {
+  padding: 10px 15px; /* Standardized padding */
+}
+
+#userListContainer h3 {
+    margin-bottom: 10px;
+    font-size: 1.3em;
+    color: var(--accent-pink);
+}
+
+#userList {
+  list-style: none;
+  padding: 0;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+#userList li {
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: rgba(255,255,255,0.05);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--light-text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#userList li:hover {
+  background-color: rgba(240, 98, 146, 0.2);
+  border-color: var(--accent-pink);
+}
+
+#userList li.selected-user {
+  background-color: var(--primary-red);
+  color: white;
+  border-color: var(--highlight-red);
+  box-shadow: 0 0 10px var(--shadow-color);
+}
+
+#userList li.is-host::after {
+  content: ' (Host)';
+  color: var(--accent-pink);
+  font-weight: bold;
+  font-size: 0.9em;
+  margin-left: 8px;
+  font-style: italic;
+}
+
+#hostControls {
+  background-color: var(--accent-mint-green);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  border: 2px dashed var(--brand-cherry);
+}
+
+#hostControls h3 {
+  color: var(--brand-cherry);
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+#hostControls label {
+  color: var(--text-primary);
+  margin-right: 5px;
+  font-size: 1em;
+}
+
+#hostControls input[type="number"],
+#hostControls input[type="text"] {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  width: auto;
+  max-width: 80px;
+  padding: 8px;
+}
+
+#hostControls button {
+  background-color: var(--accent-sky-blue);
+  margin-top: 5px;
+  margin-right: 5px;
+  padding: 10px 15px;
+  font-size: 0.9em;
+}
+
+#hostControls button:hover {
+  background-color: #A0D8EF;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: var(--accent-sky-blue);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5em;
+  line-height: 1;
+  z-index: 10;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.video-participant:hover .fullscreen-btn, #localVideoOuterContainer:hover .fullscreen-btn {
+  opacity: 1;
+}
+
+.fullscreen-btn:hover {
+  opacity: 1;
+  background-color: var(--brand-cherry);
+  transform: scale(1.1);
+}
+
+#total-active-users-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  border-radius: 5px;
+  font-size: 0.9em;
+  z-index: 1000;
+}
+
+#total-active-users-count {
+  font-weight: bold;
+}
+
+.error-message {
+  color: var(--highlight-red);
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: rgba(215, 0, 64, 0.1);
+  border: 1px solid var(--highlight-red);
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.success-message {
+  color: #34eb7d; 
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: rgba(52, 235, 125, 0.1);
+  border: 1px solid #34eb7d;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+/* === Styled Index Page === */
+@keyframes simpleTestPulse {
+    0% { background-color: lightblue; }
+    50% { background-color: lightcoral; }
+    100% { background-color: lightblue; }
+}
+
+body.styled-index-page {
+    animation: simpleTestPulse 12.5s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    box-sizing: border-box;
+}
+
+.styled-index-page .container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px 40px;
+    border-radius: 20px;
+    border: 3px solid #B2EBF2;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+}
+
+.styled-index-page h1 {
+    font-family: 'Pacifico', cursive;
+    color: #FF6B6B;
+    text-align: center;
+    font-size: 2.8em;
+    margin-bottom: 35px;
+}
+
+.styled-index-page .user-details,
+.styled-index-page .create-room-section,
+.styled-index-page .active-rooms-section {
+    background-color: #FFFFFF;
+    padding: 25px;
+    border-radius: 15px;
+    border: 2px solid #B2EBF2;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.styled-index-page label {
+    display: block;
+    color: #FF6B6B;
+    font-weight: 500;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.styled-index-page input[type="text"],
+.styled-index-page input[type="number"] {
+    width: calc(100% - 24px);
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #B2EBF2;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #5D5D5D;
+    font-size: 1em;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.styled-index-page input[type="text"]:focus,
+.styled-index-page input[type="number"]:focus {
+    border-color: #FF6B6B;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+    outline: none;
+}
+
+.styled-index-page button#createRoomBtn {
+    background-color: #FF6B6B;
+    color: white;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-transform: uppercase;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.styled-index-page button#createRoomBtn:hover {
+    background-color: #e75f5f;
+    transform: translateY(-2px);
+}
+
+.styled-index-page button#createRoomBtn:active {
+    background-color: #d15252;
+    transform: translateY(0);
+}
+
+.styled-index-page #activeRoomsList {
+    list-style: none;
+    padding: 0;
+}
+
+.styled-index-page .room-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #e0e0e0;
+}
+
+.styled-index-page #no-rooms-message {
+    background-color: #f0f8ff;
+    color: #5a7a90;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px dashed #B2EBF2;
+}
+
+/* === Emoji Rain === */
+@keyframes rainEmoji {
+    0% {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.7;
+    }
+    90% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.falling-emoji {
+    position: absolute;
+    top: -5vh;
+    font-size: 2.5rem;
+    pointer-events: none;
+    z-index: 1;
+    animation-name: rainEmoji;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    opacity: 0;
+    user-select: none;
+}
+
+/* === Debug Console === */
+#pageDebugConsoleContainer {
+    margin-top: 20px;
+    background-color: #2c2c2c;
+    border: 1px solid #555;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#pageDebugConsoleContainer h3 {
+    color: #aadeff;
+    margin-bottom: 10px;
+}
+
+#toggleDebugConsoleBtn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#toggleDebugConsoleBtn:hover {
+    background-color: #2d3748;
+}
+
+#debugContentWrapper {
+    /* display: none; is handled by inline JS initially */
+    padding-top: 10px;
+}
+
+#hostOwnLogArea, .client-log-area {
+    height: 150px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
+    background-color: #181818;
+    padding: 8px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    color: #e0e0e0;
+}
+
+#pageDebugConsoleContainer h4 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: #aadeff;
+    border-bottom: 1px dashed #444;
+    padding-bottom: 4px;
+}
+
+#clientLogsContainerPanel .client-log-container {
+    margin-bottom: 15px;
+    padding: 5px;
+    background-color: #2a2a2a;
+    border-radius: 4px;
+}
+
+#clientLogsContainerPanel .client-log-container h4 {
+    font-size: 0.95em;
+    color: #bce0f0;
+    margin-top: 5px;
+    margin-bottom: 3px;
+    padding-bottom: 3px;
+    border-bottom: 1px dotted #555;
+}
+
+/* === Camera Select Dropdown === */
+.media-controls select#cameraSelect {
+    margin-left: 10px;
+    padding: 8px 10px; /* Adjusted padding */
+    border-radius: 5px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--border-playful);
+    font-size: 0.9em;
+    cursor: pointer;
+    max-width: 200px; /* Increased max-width */
+    text-overflow: ellipsis;
+}
+
+.media-controls select#cameraSelect:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-shadow);
+}
+
+/* === Larger Host Video Styles === */
+.video-participant.host-video, #localVideoOuterContainer.host-video {
+    flex-grow: 6 !important;
+    min-height: 350px !important;
+    width: 95% !important;
+    max-width: 1100px !important;
+    border: 3px solid var(--accent-color, #ff69b4);
+    order: -1; /* Keep host at the top in flex layouts */
+    margin-bottom: 20px;
+}
+
+#videoGrid.host-prominent .video-participant.host-video-display-large {
+    grid-column: auto / span 2;
+    grid-row: auto / span 2;
+    min-width: 400px;
+    min-height: 300px;
+    order: -1; /* Also for grid, though less impactful than direct grid properties */
+}
+
+#videoGrid.host-prominent .video-participant:not(.host-video-display-large) {
+    max-width: 300px;
+    max-height: 225px;
+}
+
+.video-participant.host-video video,
+#localVideoOuterContainer.host-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* === Avatar and Audio-Only Styles === */
+.participant-avatar-img {
+    width: 80px; /* Default size for list view */
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%; /* Circular for list view */
+    background-color: var(--bg-container-alt);
+    display: block;
+}
+
+/* Avatar in video slot */
+.video-participant .participant-avatar-img-slot {
+    width: 100%; /* Takes full width of video slot */
+    height: 100%; /* Takes full height of video slot */
+    max-width: 150px; /* Max size within video slot */
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 12px; /* Match video participant's border-radius */
+    background-color: var(--accent-mint-green); /* Fallback background */
+}
+
+.audio-only-video {
+    display: none !important; /* Hide video element if audio only */
+}
+
+.video-participant > p, #localVideoOuterContainer > p { /* Name tag */
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: 500;
+    z-index: 1;
+    text-align: center;
+    width: calc(100% - 20px);
+    max-width: 90%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+/* === Mobile Responsive Media Queries === */
+@media (max-width: 992px) { /* Tablet and below */
+    .main-content {
+        flex-direction: column;
+    }
+    .participants-section {
+        min-width: auto;
+        order: 3; /* Participants below chat */
+        max-height: 300px; /* Limit height on mobile */
+    }
+    .video-chat-wrapper {
+        order: 1;
+    }
+    .chat-panel {
+        order: 2;
+        max-height: 250px; /* Limit chat height on mobile */
+    }
+    #videoGrid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) { /* Mobile */
+    h1 { font-size: 2em; }
+    .room-container header h1 { font-size: 1.6em; }
+    .container { margin: 10px; padding: 15px; }
+    
+    #videoGrid {
+        grid-template-columns: 1fr; /* Single column for videos */
+        gap: 10px;
+    }
+    .video-participant, #localVideoOuterContainer {
+        min-height: 180px; /* Adjust min height for smaller screens */
+    }
+
+    button, .join-button, .leave-room-btn, .media-controls button, .host-action-btn {
+        padding: 10px 18px;
+        font-size: 0.95em;
+    }
+
+    .media-controls {
+        flex-wrap: wrap; /* Allow buttons to wrap */
+        justify-content: center;
+        gap: 5px;
+    }
+    .media-controls button {
+        flex-basis: calc(50% - 10px); /* Two buttons per row approx */
+        margin: 5px;
+    }
+
+    .chat-input input[type="text"] {
+        font-size: 0.95em;
+    }
+    .chat-input button {
+        font-size: 0.9em;
+        padding: 10px 12px;
+    }
+
+    #hostControls input[type="number"],
+    #hostControls input[type="text"] {
+        max-width: 60px;
+        padding: 6px;
+    }
+    #hostControls button {
+        padding: 8px 12px;
+    }
+    .participants-section {
+        padding: 10px;
+    }
+    #userList li {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) { /* Small Mobile */
+    .container {
+        padding: 10px;
+        margin: 5px auto;
+        border-radius: 10px;
+    }
+    h1 { font-size: 1.8em; }
+    .room-container header h1 { font-size: 1.4em; }
+
+    .video-participant, #localVideoOuterContainer {
+        border-radius: 8px;
+    }
+
+    .media-controls button {
+        flex-basis: 100%; /* Full width buttons */
+        margin: 5px 0;
+    }
+    .media-controls select#cameraSelect {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+
+    .chat-panel {
+        padding: 10px;
+    }
+    .chat-messages {
+        padding: 5px;
+    }
+    .chat-messages div {
+        font-size: 1em;
+    }
+
+    .participants-section h3 {
+        font-size: 1.1em;
+    }
+    #userList li {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+    .video-participant > p, #localVideoOuterContainer > p { /* Name tag */
+        font-size: 0.8em;
+        padding: 3px 8px;
+    }
+    .fullscreen-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3em;
+    }
+}
+
+/* Chat panel adjustments for non-host users - ensure this is specific */
+body.non-host-view .chat-messages {
+    /* If non-hosts have a different chat layout, this could be used.
+       For now, assuming it's mainly about scroll/height handled by flex. */
+}
+
+/* Fallback for participant item styling if needed */
+.participant-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.participant-item.host-selectable-user:hover {
+    background-color: #f0f0f0;
+}
+
+.participant-item.selected-user {
+    background-color: var(--brand-cherry);
+    color: white;
+    font-weight: bold;
+}
+
+.participant-item.selected-user:hover {
+    background-color: #FF4757;
+}

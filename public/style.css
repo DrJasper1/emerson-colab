@@ -1,0 +1,1727 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Montserrat:wght@400;500;700&display=swap');
+
+:root {
+    /* Playful Palette */
+    --bg-main: #FDF6F0; /* Vanilla */
+    --bg-container: #FFFFFF; /* White */
+    --text-primary: #5D5D5D; /* Soft Dark Grey */
+    --text-secondary: #888888; /* Lighter Grey */
+    --brand-cherry: #FF6B6B; /* Playful Cherry/Coral */
+    --accent-playful-pink: #FFC0CB; /* Light Pink */
+    --accent-sky-blue: #87CEEB; /* Sky Blue */
+    --accent-mint-green: #98FB98; /* Pale Green */
+    --accent-sunshine-yellow: #FFFACD; /* Lemon Chiffon */
+
+    --border-playful: var(--accent-sky-blue);
+    --shadow-playful: rgba(135, 206, 235, 0.3); /* Sky blue shadow */
+
+    /* Fonts */
+    --font-brand: 'Pacifico', cursive;
+    --font-heading: 'Montserrat', sans-serif; /* Using Montserrat for other headings for clarity */
+    --font-body: 'Montserrat', sans-serif;
+
+    /* Legacy variables - to be replaced or removed if not used by new theme */
+    --primary-red: var(--brand-cherry);
+    --accent-pink: var(--accent-playful-pink);
+    --dark-bg: var(--bg-container); /* Remapping for existing rules */
+    --container-bg: var(--bg-container);
+    --light-text: var(--text-primary);
+    --highlight-red: #FF4757; /* A brighter red for highlights if needed */
+    --border-color: var(--border-playful);
+    --shadow-color: var(--shadow-playful);
+}
+
+body {
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+    /* Optional: Add a subtle playful pattern or gradient later */
+    /* background-image: linear-gradient(45deg, var(--accent-playful-pink) 25%, transparent 25%), linear-gradient(-45deg, var(--accent-playful-pink) 25%, transparent 25%);
+    background-size: 20px 20px; */
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: var(--bg-container);
+    border-radius: 20px; /* More rounded for playful feel */
+    box-shadow: 0 10px 30px var(--shadow-playful);
+    border: 2px solid var(--border-playful);
+}
+
+/* Emoji Picker Styles */
+#emojiPickerBtn {
+    background-color: transparent;
+    border: 1px solid var(--border-playful);
+    color: var(--brand-cherry);
+    padding: 8px 10px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.2em; /* Adjust as needed */
+    transition: background-color 0.2s, color 0.2s;
+    margin-right: 8px; /* Space between button and input */
+}
+
+#emojiPickerBtn:hover {
+    background-color: var(--accent-playful-pink);
+    border-color: var(--brand-cherry);
+}
+
+.emoji-panel {
+    display: none; /* Initially hidden, JS will toggle */
+    position: absolute;
+    bottom: calc(100% + 5px); /* Position above the input field with a small gap */
+    left: 0;
+    background-color: var(--bg-container);
+    border: 1px solid var(--border-playful);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 5px 15px var(--shadow-playful);
+    z-index: 1000;
+    width: auto; /* Adjust width based on content, or set fixed */
+    max-width: 300px; /* Prevent it from being too wide */
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex; /* Use flex to arrange emojis */
+    flex-wrap: wrap; /* Allow emojis to wrap to the next line */
+    gap: 8px; /* Spacing between emojis */
+}
+
+.emoji-item {
+    font-size: 1.8em; /* Make emojis larger and easier to click */
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.emoji-item:hover {
+    background-color: var(--accent-playful-pink);
+}
+
+/* Adjust chat input to use flex for better alignment with new button */
+.chat-input {
+    display: flex;
+    align-items: center;
+    position: relative; /* Keep for panel positioning */
+}
+
+.chat-input input[type="text"] {
+    flex-grow: 1; /* Allow input to take available space */
+    margin-right: 8px; /* Space between input and send button */
+}
+
+/* This rule is now covered by the more specific h1, and h2, h3 rules above. */
+/* We can remove it or comment it out. */
+h1 {
+    font-family: var(--font-brand); /* Apply Pacifico to main titles */
+    font-size: 3.5em; /* Make brand font larger */
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--brand-cherry);
+    font-weight: normal; /* Pacifico is already bold */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+/* For other headings like H2, H3 */
+h2, h3 {
+    font-family: var(--font-heading); /* Montserrat for other headings */
+    color: var(--brand-cherry); /* Or another playful accent */
+    font-weight: 700; /* Bolder Montserrat for headings */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Main layout for room page */
+.main-content {
+    display: flex;
+    flex-direction: row; /* .video-chat-wrapper and .participants-section side-by-side */
+    flex-grow: 1;
+    gap: 20px; /* Space between main areas */
+    min-height: 0; /* For proper flex sizing */
+    /* max-height: calc(100vh - 150px); /* Optional: constrain height relative to viewport minus header/footer */
+    /* overflow: hidden; /* If using max-height, might need this */
+}
+
+.video-chat-wrapper {
+    display: flex;
+    flex-direction: column; /* .video-section above .chat-section */
+    flex-grow: 3; /* Give more space to video/chat area compared to participants list */
+    flex-basis: 70%; /* Example basis */
+    gap: 20px;
+    min-height: 0; /* For proper flex sizing */
+    overflow: hidden; /* Prevent content from overflowing its flex container */
+}
+
+/* Sections: user-details, create-room, active-rooms */
+/* Note: .participants-section already has display:flex, flex-direction:column. We'll add flex-grow/basis here */
+
+.user-details, .create-room-section, .active-rooms-section,
+.video-section, .chat-section, .participants-section { /* .participants-section is also styled above with flex-grow/basis */
+    /* flex-grow: 0; Will be set individually or remain default */
+    flex-shrink: 0; /* Default: Do not shrink unless specified */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Fix for flex children overflow */
+    background-color: var(--bg-container);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px var(--shadow-playful);
+    border: 1px solid var(--border-playful);
+}
+
+.video-section {
+    flex-grow: 1; /* Allow .video-section to grow within .video-chat-wrapper */
+}
+
+.chat-section, .participants-section {
+    flex-grow: 0; /* Explicitly set these to not grow if not desired, or manage growth as needed */
+}
+
+.participants-section {
+    flex-grow: 1; /* Smaller portion for participants list */
+    flex-basis: 30%; /* Example basis */
+    overflow: auto; /* Allow scrolling if content overflows */
+    /* This rule might be redundant if the above change correctly re-includes it */
+    /* but ensures it has its own flex properties if needed, or specific overrides */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Participants section might not need a fixed vh, let content define height or use flex-grow in its parent */
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Basic Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        margin: 10px auto; /* Reduce margin for smaller screens */
+    }
+
+    .main-content {
+        flex-direction: column;
+    }
+
+    .video-chat-wrapper {
+        flex-direction: column;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .video-section, .chat-section {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 15px; /* Adjust padding for sections */
+    }
+
+    .video-grid {
+        grid-template-columns: 1fr; /* Stack videos vertically */
+        gap: 10px;
+    }
+
+    .video-participant video {
+        max-height: 50vh; /* Adjust as needed, ensure it's not too large */
+    }
+
+    .participants-section {
+        width: 100%;
+        margin-top: 10px;
+        padding: 15px; /* Adjust padding */
+    }
+
+    .media-controls button, .media-controls select {
+        padding: 10px 15px; /* Increase tap target size */
+        font-size: 1em; /* Ensure readability */
+        margin-bottom: 8px; /* Add some space if they stack */
+    }
+
+    .chat-input input[type="text"], .chat-input button {
+        font-size: 1em; /* Ensure readability */
+        padding: 10px; /* Increase tap target size */
+    }
+    
+    #emojiPickerBtn {
+        font-size: 1.5em; /* Ensure emoji button is tappable */
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 1.8em; /* Adjust heading sizes */
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+    
+    h3 {
+        font-size: 1.2em;
+    }
+
+    .leave-room-btn {
+        font-size: 1em;
+        padding: 8px 12px;
+    }
+
+    #hostControls input[type="text"],
+    #hostControls input[type="number"],
+    #hostControls button {
+        font-size: 1em;
+        padding: 10px;
+        width: calc(100% - 22px); /* Adjust width for padding and border */
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+    #hostControls label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+
+    /* Ensure video elements are responsive */
+    video {
+        max-width: 100%;
+        height: auto; /* Maintain aspect ratio */
+        display: block; /* Remove extra space below video */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+        margin: 5px auto;
+        border-radius: 10px; /* Softer radius for small screens */
+    }
+    
+    .video-section, .chat-section, .participants-section {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    }
+    
+    h3 {
+        font-size: 1.1em;
+    }
+
+    .video-participant p {
+        font-size: 0.9em;
+    }
+
+    .media-controls {
+        flex-direction: column;
+        align-items: stretch; /* Make buttons full width */
+    }
+
+    .media-controls button, .media-controls select {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .media-controls button:last-child, .media-controls select:last-child {
+        margin-bottom: 0;
+    }
+
+
+    .chat-messages {
+        max-height: 25vh; /* Adjust based on typical mobile screen */
+    }
+    
+    .chat-input {
+        flex-direction: column; /* Stack emoji picker, input, and send button */
+    }
+    .chat-input input[type="text"] {
+        width: calc(100% - 22px); /* Full width minus padding/border */
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    .chat-input button { /* Send button */
+        width: 100%;
+    }
+    #emojiPickerBtn {
+        align-self: flex-start; /* Align emoji picker to the left */
+        margin-bottom: 8px;
+    }
+    .emoji-panel {
+        width: calc(100% - 20px); /* Adjust panel width */
+        left: 10px; /* Center it a bit */
+        max-width: none; /* Allow it to be wider on small screens */
+    }
+}
+
+/* Add a specific style for the local video when it's audio-only to show avatar */
+.audio-only-video {
+    background-color: #333; /* Dark background for avatar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5em;
+    text-align: center;
+    width: 100%; /* Ensure it takes the video element's space */
+    height: 100%; /* Ensure it takes the video element's space */
+}
+.participant-avatar-img {
+    width: 80px; /* Adjust size as needed */
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-playful-pink);
+}
+}
+
+/* Basic Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        margin: 10px auto; /* Reduce margin for smaller screens */
+    }
+
+    .main-content {
+        flex-direction: column;
+    }
+
+    .video-chat-wrapper {
+        flex-direction: column;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .video-section, .chat-section {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 15px; /* Adjust padding for sections */
+    }
+
+    .video-grid {
+        grid-template-columns: 1fr; /* Stack videos vertically */
+        gap: 10px;
+    }
+
+    .video-participant video {
+        max-height: 50vh; /* Adjust as needed, ensure it's not too large */
+    }
+
+    .participants-section {
+        width: 100%;
+        margin-top: 10px;
+        padding: 15px; /* Adjust padding */
+    }
+
+    .media-controls button, .media-controls select {
+        padding: 10px 15px; /* Increase tap target size */
+        font-size: 1em; /* Ensure readability */
+        margin-bottom: 8px; /* Add some space if they stack */
+    }
+
+    .chat-input input[type="text"], .chat-input button {
+        font-size: 1em; /* Ensure readability */
+        padding: 10px; /* Increase tap target size */
+    }
+    
+    #emojiPickerBtn {
+        font-size: 1.5em; /* Ensure emoji button is tappable */
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 1.8em; /* Adjust heading sizes */
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+    
+    h3 {
+        font-size: 1.2em;
+    }
+
+    .leave-room-btn {
+        font-size: 1em;
+        padding: 8px 12px;
+    }
+
+    #hostControls input[type="text"],
+    #hostControls input[type="number"],
+    #hostControls button {
+        font-size: 1em;
+        padding: 10px;
+        width: calc(100% - 22px); /* Adjust width for padding and border */
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+    #hostControls label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+
+    /* Ensure video elements are responsive */
+    video {
+        max-width: 100%;
+        height: auto; /* Maintain aspect ratio */
+        display: block; /* Remove extra space below video */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+        margin: 5px auto;
+        border-radius: 10px; /* Softer radius for small screens */
+    }
+    
+    .video-section, .chat-section, .participants-section {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    }
+    
+    h3 {
+        font-size: 1.1em;
+    }
+
+    .video-participant p {
+        font-size: 0.9em;
+    }
+
+    .media-controls {
+        flex-direction: column;
+        align-items: stretch; /* Make buttons full width */
+    }
+
+    .media-controls button, .media-controls select {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .media-controls button:last-child, .media-controls select:last-child {
+        margin-bottom: 0;
+    }
+
+
+    .chat-messages {
+        max-height: 25vh; /* Adjust based on typical mobile screen */
+    }
+    
+    .chat-input {
+        flex-direction: column; /* Stack emoji picker, input, and send button */
+    }
+    .chat-input input[type="text"] {
+        width: calc(100% - 22px); /* Full width minus padding/border */
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    .chat-input button { /* Send button */
+        width: 100%;
+    }
+    #emojiPickerBtn {
+        align-self: flex-start; /* Align emoji picker to the left */
+        margin-bottom: 8px;
+    }
+    .emoji-panel {
+        width: calc(100% - 20px); /* Adjust panel width */
+        left: 10px; /* Center it a bit */
+        max-width: none; /* Allow it to be wider on small screens */
+    }
+}
+
+/* Add a specific style for the local video when it's audio-only to show avatar */
+.audio-only-video {
+    background-color: #333; /* Dark background for avatar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5em;
+    text-align: center;
+    width: 100%; /* Ensure it takes the video element's space */
+    height: 100%; /* Ensure it takes the video element's space */
+}
+.participant-avatar-img {
+    width: 80px; /* Adjust size as needed */
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-playful-pink);
+}
+
+/* Basic Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        margin: 10px auto; /* Reduce margin for smaller screens */
+    }
+
+    .main-content {
+        flex-direction: column;
+    }
+
+    .video-chat-wrapper {
+        flex-direction: column;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .video-section, .chat-section {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 15px; /* Adjust padding for sections */
+    }
+
+    .video-grid {
+        grid-template-columns: 1fr; /* Stack videos vertically */
+        gap: 10px;
+    }
+
+    .video-participant video {
+        max-height: 50vh; /* Adjust as needed, ensure it's not too large */
+    }
+
+    .participants-section {
+        width: 100%;
+        margin-top: 10px;
+        padding: 15px; /* Adjust padding */
+    }
+
+    .media-controls button, .media-controls select {
+        padding: 10px 15px; /* Increase tap target size */
+        font-size: 1em; /* Ensure readability */
+        margin-bottom: 8px; /* Add some space if they stack */
+    }
+
+    .chat-input input[type="text"], .chat-input button {
+        font-size: 1em; /* Ensure readability */
+        padding: 10px; /* Increase tap target size */
+    }
+    
+    #emojiPickerBtn {
+        font-size: 1.5em; /* Ensure emoji button is tappable */
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 1.8em; /* Adjust heading sizes */
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+    
+    h3 {
+        font-size: 1.2em;
+    }
+
+    .leave-room-btn {
+        font-size: 1em;
+        padding: 8px 12px;
+    }
+
+    #hostControls input[type="text"],
+    #hostControls input[type="number"],
+    #hostControls button {
+        font-size: 1em;
+        padding: 10px;
+        width: calc(100% - 22px); /* Adjust width for padding and border */
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+    #hostControls label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+
+    /* Ensure video elements are responsive */
+    video {
+        max-width: 100%;
+        height: auto; /* Maintain aspect ratio */
+        display: block; /* Remove extra space below video */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+        margin: 5px auto;
+        border-radius: 10px; /* Softer radius for small screens */
+    }
+    
+    .video-section, .chat-section, .participants-section {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    }
+    
+    h3 {
+        font-size: 1.1em;
+    }
+
+    .video-participant p {
+        font-size: 0.9em;
+    }
+
+    .media-controls {
+        flex-direction: column;
+        align-items: stretch; /* Make buttons full width */
+    }
+
+    .media-controls button, .media-controls select {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .media-controls button:last-child, .media-controls select:last-child {
+        margin-bottom: 0;
+    }
+
+
+    .chat-messages {
+        max-height: 25vh; /* Adjust based on typical mobile screen */
+    }
+    
+    .chat-input {
+        flex-direction: column; /* Stack emoji picker, input, and send button */
+    }
+    .chat-input input[type="text"] {
+        width: calc(100% - 22px); /* Full width minus padding/border */
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    .chat-input button { /* Send button */
+        width: 100%;
+    }
+    #emojiPickerBtn {
+        align-self: flex-start; /* Align emoji picker to the left */
+        margin-bottom: 8px;
+    }
+    .emoji-panel {
+        width: calc(100% - 20px); /* Adjust panel width */
+        left: 10px; /* Center it a bit */
+        max-width: none; /* Allow it to be wider on small screens */
+    }
+}
+
+/* Add a specific style for the local video when it's audio-only to show avatar */
+.audio-only-video {
+    background-color: #333; /* Dark background for avatar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5em;
+    text-align: center;
+    width: 100%; /* Ensure it takes the video element's space */
+    height: 100%; /* Ensure it takes the video element's space */
+}
+.participant-avatar-img {
+    width: 80px; /* Adjust size as needed */
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-playful-pink);
+}
+
+
+    border-radius: 10px;
+    margin-bottom: 10px;
+    min-height: 150px;
+    max-height: 40vh; /* Keep this relative height */
+    border: 2px dashed var(--accent-sky-blue);
+}
+
+/* Chat panel layout adjustments for non-host users (when chat is in right panel) */
+body.non-host-view .participants-section .chat-section {
+    flex-grow: 1; /* Allow chat to take available space in participants panel */
+    min-height: 200px; /* Ensure it has some minimum visible height */
+    /* max-height: 50%; /* Or some other constraint if needed */
+    width: 100%;
+    margin-top: 15px; /* Add some space between user list and chat */
+    border-top: 2px dashed var(--accent-sky-blue); /* Visual separator */
+    padding-top: 15px;
+}
+
+body.non-host-view .participants-section #userList {
+    max-height: 40vh; /* Example: Limit user list height and make it scrollable if too long */
+    overflow-y: auto;
+    flex-shrink: 0; /* Prevent user list from shrinking too much */
+}
+
+/* Ensure video section takes full height in its wrapper when chat is moved */
+body.non-host-view .video-chat-wrapper .video-section {
+    flex-grow: 1;
+}
+
+/* Original chat panel adjustments for non-host users (when chat is below video) - these might need review */
+/* This rule was for when chat was below video, now it's in the right panel */
+/* We might not need these specific overrides anymore if the above handles it well */
+/* body.non-host-view .chat-messages { ... } */
+
+/* Chat panel layout adjustments for non-host users (when chat is in right panel) */
+body.non-host-view .participants-section .chat-section {
+    flex-grow: 1; /* Allow chat to take available space in participants panel */
+    min-height: 200px; /* Ensure it has some minimum visible height */
+    /* max-height: 50%; /* Or some other constraint if needed */
+    width: 100%;
+    margin-top: 15px; /* Add some space between user list and chat */
+    border-top: 2px dashed var(--accent-sky-blue); /* Visual separator */
+    padding-top: 15px;
+}
+
+body.non-host-view .participants-section #userList {
+    max-height: 40vh; /* Example: Limit user list height and make it scrollable if too long */
+    overflow-y: auto;
+    flex-shrink: 0; /* Prevent user list from shrinking too much */
+}
+
+/* Ensure video section takes full height in its wrapper when chat is moved */
+body.non-host-view .video-chat-wrapper .video-section {
+    flex-grow: 1;
+}
+
+/* Original chat panel adjustments for non-host users (when chat is below video) - these might need review */
+/* This rule was for when chat was below video, now it's in the right panel */
+/* We might not need these specific overrides anymore if the above handles it well */
+/* body.non-host-view .chat-messages { ... } */
+
+/* Chat panel adjustments for non-host users */
+body.non-host-view .chat-messages {
+    max-height: none; /* Allow chat to take up necessary height */
+    overflow-y: visible; /* Prevent internal scrollbar for non-hosts */
+    /* flex-grow: 1; is already set, which is good */
+}
+
+/* body.non-host-view .chat-section { */
+    /* If chat-section needs to grow more significantly for non-hosts */
+    /* flex-grow: 1; /* Experiment if needed */
+/* } */
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--brand-cherry); /* Changed to brand-cherry for playful consistency */
+    font-size: 1.1em;
+}
+
+input[type="text"], input[type="number"], textarea {
+    width: calc(100% - 24px); /* Full width minus padding */
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid var(--border-playful); /* Default border playful */
+    border-radius: 10px;
+    background-color: #fff; /* White background for inputs */
+    color: var(--text-primary);
+    font-size: 1em;
+    font-family: var(--font-body);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+    border-color: var(--brand-cherry);
+    box-shadow: 0 0 8px var(--shadow-playful);
+    outline: none;
+}
+
+button, .join-button, .media-controls button, .host-action-btn {
+    background-color: var(--brand-cherry);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px; /* Pill shape */
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1em;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    /* margin-left: auto; Removed from general rule, apply specifically where needed */
+}
+
+button:hover, .join-button:hover, .media-controls button:hover, .host-action-btn:hover:not(:disabled) {
+    background-color: #FF8A8A; /* Lighter shade of brand-cherry */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}
+
+button:active, .join-button:active, .media-controls button:active, .host-action-btn:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.leave-room-btn {
+    background-color: var(--accent-sky-blue); /* Sky blue for leave button */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1em;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.leave-room-btn:hover {
+    background-color: #A0D8EF; /* Lighter sky blue */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}
+
+.leave-room-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+#roomList {
+    list-style: none;
+    padding: 0;
+}
+
+.room-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: var(--accent-sunshine-yellow); /* Playful background for room items */
+    border-radius: 12px;
+    border: 2px solid var(--brand-cherry);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.room-item:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.room-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    margin-right: 15px;
+    object-fit: cover;
+    border: 2px solid var(--brand-cherry);
+    padding: 3px;
+    background-color: var(--dark-bg);
+}
+
+.room-info {
+    flex-grow: 1;
+    color: var(--light-text);
+}
+
+.room-info strong {
+    font-size: 1.2em;
+    color: var(--brand-cherry);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Room Page Specific Styles */
+.room-container header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed var(--accent-playful-pink); /* Playful dashed border */
+}
+
+.room-container header h1 {
+    font-size: 2.2em;
+    margin-bottom: 0;
+}
+
+.main-content {
+    display: flex;
+    gap: 30px;
+}
+
+.video-chat-wrapper {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 0px; /* Reduced gap slightly */
+    /* Ensure media controls are always visible and accessible */
+    min-height: 0; /* Fix for flex children overflow */
+}
+
+#videoGrid {
+    display: flex !important; /* Force flex display to override any grid styles */
+    flex-direction: column !important; /* Force vertical stacking */
+    gap: 15px; /* Space between video items */
+    padding: 10px;
+    flex-grow: 1; /* Fill available vertical space in .video-section */
+    flex-shrink: 0; /* Don't shrink */
+    align-items: center; /* Center video blocks horizontally */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    max-height: calc(100vh - 200px); /* Adjusted: less reserved space for header */
+    width: 100%; /* Take full width of container */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.video-participant, #localVideoOuterContainer {
+    background-color: #2c2c2c;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    width: 85%; /* Default width for non-host */
+    max-width: 700px; /* Default max-width for non-host */
+    margin-bottom: 15px; 
+    flex-grow: 3; /* Default flex-grow for non-host */
+    flex-shrink: 0;
+    flex-basis: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px; /* Default min-height for non-host */
+    height: auto;
+}
+
+.video-participant video, #localVideoOuterContainer video {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 16/9; /* Maintain aspect ratio */
+    object-fit: cover; /* Cover the area, may crop */
+    background-color: #1a1a1a; /* Fallback if video not loaded */
+}
+
+.fullscreen-btn {
+    position: absolute;
+    top: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 1.2em; /* Larger icon */
+    z-index: 10;
+    transition: background-color 0.2s ease;
+}
+
+.fullscreen-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.fullscreen-btn {
+    right: 8px;
+}
+
+.video-participant p { /* New centered name tag style */
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.65); /* Slightly more opaque */
+    color: white;
+    padding: 4px 10px; /* Adjusted padding */
+    border-radius: 5px; /* Slightly more rounded */
+    font-size: 0.9em;
+    font-weight: 500; /* Keep font weight */
+    z-index: 1; /* Ensure it's above the avatar/video */
+    text-align: center;
+    width: calc(100% - 20px); /* Prevent overflow, allow some padding from edges */
+    max-width: 90%; /* Ensure it doesn't get too wide on large containers */
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3; /* Ensure text fits well */
+}
+
+.media-controls {
+    text-align: center;
+}
+
+.media-controls button {
+    margin: 0 10px;
+}
+
+/* Chat Messages Styles */
+.chat-messages div {
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(240, 98, 146, 0.3); /* Dashed pink border */
+    color: var(--text-chat-pink);
+    font-size: 1.1em; /* Increased chat text size */
+}
+
+.chat-messages div:last-child {
+    border-bottom: none;
+}
+
+.chat-messages strong {
+    color: var(--accent-pink);
+    font-weight: 500;
+}
+
+.chat-input {
+    display: flex;
+    align-items: center; /* Vertically align items if button/input heights differ */
+    margin-top: 10px;
+}
+
+.chat-input input[type="text"] {
+    flex-grow: 1;
+    margin-right: 10px;
+    margin-bottom: 0; /* Remove bottom margin for inline alignment */
+    padding: 12px;
+    font-size: 1em;
+}
+
+/* The .participants-section block that was here was a result of a previous mis-edit and has been removed. 
+   The primary styling for .participants-section (flex:1) is around line 363, 
+   and its flex container properties (display:flex, flex-direction:column) are from the shared rule around line 141. */
+
+#userList {
+    list-style: none;
+    padding: 0;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+#userList li {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--light-text);
+}
+
+#userList li:hover {
+    background-color: rgba(240, 98, 146, 0.2);
+    border-color: var(--accent-pink);
+}
+
+#userList li.selected-user {
+    background-color: var(--primary-red);
+    color: white;
+    border-color: var(--highlight-red);
+    box-shadow: 0 0 10px var(--shadow-color);
+}
+
+#userList li.is-host::after {
+    content: ' (Host)';
+    color: var(--accent-pink);
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-left: 8px;
+    font-style: italic;
+}
+
+#hostControls {
+    background-color: var(--accent-mint-green); /* Light green for host controls */
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    border: 2px dashed var(--brand-cherry);
+}
+
+#hostControls h3 {
+    color: var(--brand-cherry);
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+#hostControls label {
+    color: var(--text-primary);
+    margin-right: 5px; /* Reduced margin */
+    font-size: 1em; /* Standardized label size */
+}
+
+#hostControls input[type="number"],
+#hostControls input[type="text"] {
+    margin-right: 10px;
+    margin-bottom: 10px; /* Added margin for spacing if they wrap */
+    width: auto; /* Allow inputs to size naturally */
+    max-width: 80px; /* Slightly smaller max-width */
+    padding: 8px; /* Smaller padding for host control inputs */
+}
+
+#hostControls button {
+    background-color: var(--accent-sky-blue);
+    margin-top: 5px; /* Reduced top margin */
+    margin-right: 5px; /* Added right margin for multiple buttons */
+    padding: 10px 15px; /* Smaller padding for host control buttons */
+    font-size: 0.9em;
+}
+
+#hostControls button:hover {
+    background-color: #A0D8EF;
+}
+
+/* Fullscreen button for video participants */
+.fullscreen-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: var(--accent-sky-blue);
+    color: white;
+    border: none;
+    border-radius: 50%; /* Circular button */
+    width: 40px; /* Fixed size */
+    height: 40px;
+    padding: 0; /* Remove padding, center icon with flex */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5em; /* Larger icon */
+    line-height: 1;
+    z-index: 10;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.video-participant:hover .fullscreen-btn {
+    opacity: 1;
+}
+
+.fullscreen-btn:hover {
+    opacity: 1;
+    background-color: var(--brand-cherry);
+    transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) { /* Adjusted breakpoint */
+    .main-content {
+        flex-direction: column;
+    }
+    .participants-section {
+        min-width: auto;
+        order: 3;
+    }
+    .video-chat-wrapper {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 2.2em; }
+    .room-container header h1 { font-size: 1.8em; }
+    .container { margin: 20px; padding: 20px; }
+    .video-grid {
+        grid-template-columns: 1fr; /* Single column for videos */
+    }
+    button, .join-button, .leave-room-btn, .media-controls button, .host-action-btn {
+        padding: 10px 15px;
+        font-size: 1em;
+    }
+}
+
+#total-active-users-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border-radius: 5px;
+    font-size: 0.9em;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+#total-active-users-count {
+    font-weight: bold;
+}
+
+#no-rooms-message {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: var(--text-secondary); /* Changed to softer text-secondary */
+    font-size: 1.2em;
+}
+
+.error-message {
+    color: var(--highlight-red);
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(215, 0, 64, 0.1);
+    border: 1px solid var(--highlight-red);
+    border-radius: 5px;
+}
+
+.success-message {
+    color: #34eb7d; /* A bright green for success */
+    font-weight: bold;
+}
+
+/* Styles for Host's Multi-Panel Debug Console */
+#hostOwnLogArea, .client-log-area {
+    height: 150px; /* Adjust as needed */
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
+    background-color: #181818; /* Darker background for log areas */
+    padding: 8px;
+    border-radius: 3px;
+    margin-bottom: 10px; /* Space between log areas */
+    border: 1px solid #333; /* Subtle border for each log panel */
+}
+
+#pageDebugConsoleContainer h4 { /* Titles for 'My Local Logs' and 'Connected Client Logs' */
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: #aadeff; /* Lighter blue for these subheadings */
+    border-bottom: 1px dashed #444;
+    padding-bottom: 4px;
+}
+
+#clientLogsContainerPanel .client-log-container { /* Container for each client's log section */
+    margin-bottom: 15px;
+    padding: 5px;
+    background-color: #2a2a2a; /* Slightly different background for client log groups */
+    border-radius: 4px;
+}
+
+#clientLogsContainerPanel .client-log-container h4 { /* Titles for 'Logs from Client X' */
+    font-size: 0.95em;
+    color: #bce0f0; /* Specific color for client ID titles */
+    margin-top: 5px;
+    margin-bottom: 3px;
+    padding-bottom: 3px;
+    border-bottom: 1px dotted #555;
+}
+
+/* Ensure the main debug console container has some distinction */
+#pageDebugConsoleContainer {
+    margin-bottom: 10px; /* Add some space below the whole debug console */
+    background-color: #2c2c2c; /* Slightly different main background */
+    border: 1px solid #555; /* More prominent border for the whole debug area */
+    padding: 10px; /* Ensure the container has some space */
+}
+
+#toggleDebugConsoleBtn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    background-color: #4a5568; /* Tailwind gray-600 like */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#toggleDebugConsoleBtn:hover {
+    background-color: #2d3748; /* Tailwind gray-700 like */
+}
+
+
+#debugContentWrapper.expanded {
+    display: block;
+}
+
+#debugContentWrapper {
+    /* display: none; is handled by inline JS initially */
+    /* Can add padding or borders here if needed when expanded */
+    padding-top: 10px; /* Add some space between header and log content */
+}
+
+/* Avatar Styling for Audio-Only Users */
+.participant-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px; /* Should match .video-participant's border-radius */
+    background-color: var(--bg-container-alt); /* Fallback background */
+    display: block; /* Ensure it behaves as a block element */
+}
+
+/* Hide video element when user is audio-only and avatar is shown */
+.audio-only-video {
+    display: none !important;
+}
+
+/*
+Ensure the container for video/avatar maintains space and proper layout.
+Base .video-participant styles are defined earlier (e.g., aspect-ratio, background).
+These rules ensure the container behaves correctly for avatars and name tags.
+*/
+.video-participant {
+    /* position: relative; is often set by default or inherited, but explicitly set if needed */
+    /* display: flex; is often set by default or inherited, but explicitly set if needed */
+    /* justify-content: center; is often set by default or inherited, but explicitly set if needed */
+    /* align-items: center; is often set by default or inherited, but explicitly set if needed */
+    /* overflow: hidden; is often set by default or inherited, but explicitly set if needed */
+    /* Ensure these are active if not already part of the base .video-participant style */
+    position: relative; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    overflow: hidden; 
+}
+
+
+/* Adjustments for name tag when avatar is present or video is small */
+.video-participant > p {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.65); /* Slightly more opaque */
+    color: white;
+    padding: 4px 10px; /* Adjusted padding */
+    border-radius: 5px; /* Slightly more rounded */
+    font-size: 0.9em;
+    font-weight: 500; /* Keep font weight */
+    z-index: 1; /* Ensure it's above the avatar/video */
+    text-align: center;
+    width: calc(100% - 20px); /* Prevent overflow, allow some padding from edges */
+    max-width: 90%; /* Ensure it doesn't get too wide on large containers */
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3; /* Ensure text fits well */
+}
+
+
+/* === New Front Page Styling (Styled Index Page) === */
+
+/* @keyframes animatedBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+} */
+
+@keyframes simpleTestPulse {
+    0% { background-color: lightblue; }
+    50% { background-color: lightcoral; }
+    100% { background-color: lightblue; }
+}
+
+body.styled-index-page {
+    /* background: linear-gradient(135deg, #fdeff9, #e0f7fa, #fdeff9, #e0f7fa); */
+    /* background-size: 400% 400%; */
+    animation: simpleTestPulse 12.5s ease infinite; /* Apply the new simple animation, slowed down */
+    
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top to see content if it overflows */
+    min-height: 100vh;
+    padding-top: 40px; /* Add some padding at the top */
+    padding-bottom: 40px; /* Add padding at the bottom */
+    box-sizing: border-box;
+}
+
+.styled-index-page .container {
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+    padding: 30px 40px;
+    border-radius: 20px;
+    border: 3px solid #B2EBF2; /* Light blue border */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px; /* Max width for the container */
+    margin: 0 auto; /* Center container if page is wider */
+    position: relative; /* Ensure emojis are behind other content if z-index is used elsewhere */
+    z-index: 10;       /* Above emojis */
+}
+
+.styled-index-page h1 {
+    font-family: 'Pacifico', cursive; /* From your existing :root variables */
+    color: #FF6B6B; /* Coral/Cherry color from image */
+    text-align: center;
+    font-size: 2.8em; /* Adjust as needed */
+    margin-bottom: 35px;
+}
+
+.styled-index-page .user-details,
+.styled-index-page .create-room-section {
+    background-color: #FFFFFF;
+    padding: 25px;
+    border-radius: 15px;
+    border: 2px solid #B2EBF2; /* Light blue border */
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.styled-index-page .active-rooms-section {
+    /* Assuming you want similar styling if this section exists */
+    background-color: #FFFFFF;
+    padding: 25px;
+    border-radius: 15px;
+    border: 2px solid #B2EBF2; /* Light blue border */
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+
+.styled-index-page label {
+    display: block;
+    color: #FF6B6B; /* Coral/Cherry color */
+    font-weight: 500;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.styled-index-page input[type="text"],
+.styled-index-page input[type="number"] {
+    width: calc(100% - 24px); /* Full width minus padding */
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #B2EBF2; /* Light blue border */
+    border-radius: 10px;
+    background-color: #fff;
+    color: #5D5D5D; /* Soft Dark Grey */
+    font-size: 1em;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.styled-index-page input[type="text"]:focus,
+.styled-index-page input[type="number"]:focus {
+    border-color: #FF6B6B; /* Coral/Cherry on focus */
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+    outline: none;
+}
+
+.styled-index-page button#createRoomBtn {
+    background-color: #FF6B6B; /* Coral/Cherry color */
+    color: white;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 25px; /* Pill shape */
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-transform: uppercase;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.styled-index-page button#createRoomBtn:hover {
+    background-color: #e75f5f; /* Darker shade on hover */
+    transform: translateY(-2px);
+}
+
+.styled-index-page button#createRoomBtn:active {
+    background-color: #d15252; /* Even darker on active/click */
+    transform: translateY(0);
+}
+
+/* Participant Count - Hidden by default, shown for host via JS */
+#participantCount {
+    display: none;
+    margin-left: 15px; /* Example spacing if it's near other elements */
+    font-weight: 500;
+    color: var(--text-secondary);
+    /* Adjust display property (e.g., 'inline-block' or 'flex') in JS if it needs to align with other header elements */
+}
+
+/* Styling for file input to be less obtrusive if needed */
+.styled-index-page input[type="file"] {
+    margin-top: 5px;
+    font-family: 'Montserrat', sans-serif;
+    color: #5D5D5D;
+}
+
+/* Ensure active rooms list also gets some love if it's on this page */
+.styled-index-page #activeRoomsList {
+    list-style: none;
+    padding: 0;
+}
+
+.styled-index-page .room-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #e0e0e0;
+    /* Add more styles as per the image if active rooms are shown */
+}
+
+.styled-index-page #no-rooms-message {
+    background-color: #f0f8ff; /* Light alice blue */
+    color: #5a7a90;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px dashed #B2EBF2;
+}
+
+/* === Emoji Rain === */
+@keyframes rainEmoji {
+    0% {
+        transform: translateY(-10vh) rotate(0deg); /* Start above viewport */
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.7; /* Fade in to 70% opacity */
+    }
+    90% { /* Original fade-out timing */
+        opacity: 0.7; /* Visible at 70% opacity */
+    }
+    100% {
+        transform: translateY(110vh) rotate(360deg); /* Fall below viewport and rotate */
+        opacity: 0;
+    }
+}
+
+.falling-emoji {
+    position: absolute; /* Scrolls with the page */
+    top: -5vh; /* Start slightly above viewport, animation handles Y */
+    font-size: 2.5rem; /* Size of the emojis */
+    pointer-events: none; /* So they don't block clicks */
+    z-index: 1; /* Behind the main container, but above body's own background */
+    animation-name: rainEmoji;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    opacity: 0; /* Start hidden, animation fades in */
+    user-select: none; /* Prevent text selection of emojis */
+}
+
+/* Camera Selection Dropdown Styling */
+.media-controls select#cameraSelect {
+    margin-left: 10px; /* Space it from other buttons */
+    padding: 5px 8px;
+    border-radius: 5px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--border-playful);
+    font-size: 0.9em;
+    cursor: pointer;
+    max-width: 150px; /* Prevent it from becoming too wide */
+    text-overflow: ellipsis; /* Show ... if option text is too long */
+}
+
+.media-controls select#cameraSelect:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-shadow);
+}
+
+/* Styles for larger host video */
+.video-participant.host-video, #localVideoOuterContainer.host-video {
+    flex-grow: 6 !important; /* New default host size - large */
+    min-height: 350px !important;
+    width: 95% !important; /* Host video takes more width */
+    max-width: 1100px !important; /* Larger max width for host */
+    border: 3px solid var(--accent-color, #ff69b4); /* Host-specific border */
+    order: -1; /* Keep host at the top */
+    margin-bottom: 20px;
+}
+
+/* Ensure local video container, when host, also gets highlighted and potentially sized */
+#localVideoOuterContainer.host-video {
+    border: 3px solid var(--accent-color, #ff69b4);
+    /* If local video is directly in a flex container and needs sizing:
+    flex-basis: 60%;
+    flex-grow: 2;
+    order: -1; 
+    max-width: 70%;
+    max-height: 70vh;
+    */
+}
+
+#videoGrid {
+    align-content: start; /* Align grid content to the start, might help with extra space */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjust minmax as needed */
+    gap: 10px; /* Spacing between videos */
+    padding: 10px;
+    width: 100%;
+    max-width: 1200px; /* Optional: constrain max width of the grid */
+    margin: 0 auto; /* Center the grid if max-width is set */
+}
+
+/* Adjustments for video grid to accommodate a larger host video */
+
+/* Styles for the host's video when viewed by other participants */
+#videoGrid.host-prominent .video-participant.host-video-display-large {
+    grid-column: auto / span 2; /* Make it take up two columns, try to auto place */
+    grid-row: auto / span 2;    /* Make it take up two rows, try to auto place */
+    min-width: 400px; /* Ensure host video is substantially larger */
+    min-height: 300px;
+    /* aspect-ratio: 16 / 9; /* Optional: maintain aspect ratio */
+    order: -1; /* Still useful for non-grid fallbacks or initial ordering hint */
+    /* JS is likely needed to ensure the host video element is the FIRST child of videoGrid for reliable top-left positioning if that's desired. */
+}
+
+/* Default styling for participant videos when host is prominent */
+#videoGrid.host-prominent .video-participant:not(.host-video-display-large) {
+    /* Ensure other videos are smaller, e.g., by setting a max size or letting them fit the grid */
+    max-width: 300px; /* Example: constrain non-host videos */
+    max-height: 225px;
+}
+
+/* Style for the video element within the host container to ensure it fills the space */
+.video-participant.host-video video,
+#localVideoOuterContainer.host-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Or 'contain' depending on desired aspect ratio handling */
+}
+
+/* Styles for host selecting users in participant list */
+.participant-item.host-selectable-user {
+    cursor: pointer;
+    padding: 5px;
+    margin: 2px 0;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.participant-item.host-selectable-user:hover {
+    background-color: #f0f0f0; /* Light grey hover for selectable users */
+}
+
+.participant-item.selected-user {
+    background-color: var(--brand-cherry); /* Use brand color for selection */
+    color: white; /* White text for contrast on brand color */
+    font-weight: bold;
+}
+
+.participant-item.selected-user:hover {
+    background-color: #FF4757; /* Slightly darker/brighter cherry on hover for selected */
+}

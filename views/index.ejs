@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild Cherry Cams - Welcome</title> <!-- Assuming a favicon exists or will be added -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="styled-index-page">
+    <div id="total-active-users-container">
+        Total Active Users: <span id="total-active-users-count">0</span>
+    </div>
+    <div class="container">
+        <h1>Welcome to Wild Cherry Cams</h1>
+
+        <div class="user-details">
+            <label for="displayName">Your Display Name (optional):</label>
+            <input type="text" id="displayName" placeholder="Enter your name">
+        </div>
+
+        <% if (isAdmin) { %>
+            <div class="create-room-section">
+                <h2>Create a New Room</h2>
+                <form action="/create-room" method="POST" class="create-room-form" enctype="multipart/form-data">
+                    <div>
+                        <label for="roomName">Room Name:</label>
+                        <input type="text" id="roomName" name="roomName" placeholder="E.g., Chill Hangout (optional)">
+                    </div>
+                    <div>
+                        <label for="roomCapacity">Max Users (2-10):</label>
+                        <input type="number" id="roomCapacity" name="roomCapacity" min="2" max="10" value="2">
+                    </div>
+                    <div>
+                        <label for="roomPicture">Room Picture (optional):</label>
+                        <input type="file" id="roomPicture" name="roomPicture" accept="image/*">
+                    </div>
+                    <button type="submit">Create & Join Room</button>
+                </form>
+            </div>
+            <button id="admin-logout-btn">Logout</button>
+        <% } else { %>
+            <button id="admin-login-btn">Admin Login</button>
+            <div id="admin-panel" style="display: none; margin-top: 10px;">
+                <h2>Admin Access</h2>
+                <input type="password" id="admin-password" placeholder="Password">
+                <button id="submit-admin-password">Login</button>
+            </div>
+        <% } %>
+
+        <div class="active-rooms-section">
+            <h2>Active Rooms</h2>
+            <ul id="roomList">
+                <% if (rooms.length === 0) { %>
+                    <li id="no-rooms-message">No active rooms. <% if (isAdmin) { %>Why not create one?<% } %></li>
+                <% } else { %>
+                    <% rooms.forEach(room => { %>
+                        <li class="room-item" id="room-<%= room.id %>">
+                            <img src="<%= room.picture || '/default_room_icon.png' %>" alt="Room Picture" class="room-icon" onerror="if (this.src !== '/default_room_icon.png') { this.src = '/default_room_icon.png'; this.alt = 'Default Icon'; } this.onerror=null;">
+                            <div class="room-info">
+                                <strong><%= room.name %></strong> 
+                                (<span class="user-count"><%= room.userCount %></span>/<span class="capacity"><%= room.capacity %></span> users)
+                            </div>
+                            <a href="/room/<%= room.id %>" class="join-button" data-roomid="<%= room.id %>">Join Room</a>
+                            <% if (isAdmin) { %>
+                                <button class="delete-room-btn admin-action" data-roomid="<%= room.id %>">Delete</button>
+                                <button class="rename-room-btn admin-action" data-roomid="<%= room.id %>" data-roomname="<%= room.name %>">Rename</button>
+                            <% } %>
+                        </li>
+                    <% }) %>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/index_page_features.js"></script> <!-- Script for index page specific features -->
+    <script src="/script.js"></script> <!-- Existing main script for index page -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.querySelector('body.styled-index-page');
+            if (!body) return;
+
+            const emojis = ['🍒']; // Only cherries
+            const fixedAnimationDuration = 15.6; // seconds, 30% slower (was 12s)
+            
+            // Define symmetrical lane positions: [left1, left2, right1, right2]
+            // These percentages should be outside the central GUI container area.
+            // Assuming .container max-width is ~600px, it's roughly 50-60% of a 1024-1280px viewport.
+            // So, 0-20% and 80-100% should be safe side areas.
+            const lanePositions = ['10%', '20%', '80%', '90%'];
+            const numberOfEmojis = lanePositions.length; // Create one emoji per lane
+
+            for (let i = 0; i < numberOfEmojis; i++) {
+                const emojiSpan = document.createElement('span');
+                emojiSpan.classList.add('falling-emoji');
+                // Alternate between cherry and star for the lanes
+                emojiSpan.textContent = emojis[i % emojis.length]; 
+                
+                // Assign to a specific lane
+                emojiSpan.style.left = lanePositions[i];
+                
+                // Consistent animation duration
+                emojiSpan.style.animationDuration = fixedAnimationDuration + 's';
+                
+                // Staggered animation delay for a steady rate of appearance
+                // Each emoji starts at a different phase of the total duration cycle
+                emojiSpan.style.animationDelay = (i * (fixedAnimationDuration / numberOfEmojis)) + 's';
+                
+                body.appendChild(emojiSpan);
+            }
+        });
+    </script>
+</body>
+</html>
