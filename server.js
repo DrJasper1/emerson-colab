@@ -90,6 +90,7 @@ if (process.env.ADMIN_PASSWORD) {
 console.log(`Admin password is set. (Note: Actual password is not logged for security)`);
 
 const PORT = process.env.PORT || 3001;
+const HOST_RECONNECT_GRACE_PERIOD = 30000; // 30 seconds for host to reconnect
 const authenticatedAdminIPs = new Set();
 
 app.set('view engine', 'ejs');
@@ -228,6 +229,63 @@ app.post('/create-room', upload.single('roomPicture'), (req, res) => {
     }
     res.redirect(`/room/${roomId}`);
 });
+
+// Helper function for deleting a room and broadcasting
+function deleteRoomInternal(roomId, reason) {
+    if (rooms[roomId]) {
+        console.log(`Deleting room ${roomId}. Reason: ${reason}`);
+        const roomPicture = rooms[roomId].picture;
+        // Only attempt to delete uploaded pictures, not default ones
+        if (roomPicture && roomPicture !== '/default_room_icon.png' && roomPicture.startsWith('/room_pictures/')) {
+            const actualFilePath = path.join(__dirname, 'public', roomPicture);
+            if (fs.existsSync(actualFilePath)) {
+                fs.unlink(actualFilePath, (err) => {
+                    if (err) console.error(`Error deleting room picture ${actualFilePath}:`, err);
+                    else console.log(`Deleted room picture ${actualFilePath}`);
+                });
+            } else {
+                // console.warn(`Room picture ${actualFilePath} not found for deletion.`);
+            }
+        }
+
+        // Clear any pending host reconnect timer for this room specifically
+        if (rooms[roomId].hostReconnectTimer) {
+            clearTimeout(rooms[roomId].hostReconnectTimer);
+            rooms[roomId].hostReconnectTimer = null;
+        }
+        rooms[roomId].pendingHostReconnectUserId = null;
+
+        delete rooms[roomId];
+        broadcastRoomDeletion(roomId); // Notify clients room is gone
+        console.log(`Room ${roomId} deleted and deletion broadcasted.`);
+    }
+}
+
+// Helper function to check conditions and delete room if necessary
+function checkAndHandleRoomDeletion(roomId, triggerEventDescription = "Unknown event") {
+    if (!rooms[roomId]) {
+        // console.log(`checkAndHandleRoomDeletion: Room ${roomId} already deleted. Trigger: ${triggerEventDescription}`);
+        return;
+    }
+
+    const room = rooms[roomId];
+    const isRoomEmpty = room.users.length === 0;
+
+    // Condition 1: Room is empty
+    if (isRoomEmpty) {
+        deleteRoomInternal(roomId, `Room empty. Trigger: ${triggerEventDescription}`);
+        return;
+    }
+
+    // Condition 2: No effective host (and not because a host is merely pending reconnection)
+    // An "effective host" means room.hostId is set AND that host (by userId) is actually in room.users array.
+    const currentHostUser = room.hostId ? room.users.find(user => user.userId === room.hostId) : null;
+    if (!currentHostUser && !room.pendingHostReconnectUserId) {
+        deleteRoomInternal(roomId, `No effective host. Trigger: ${triggerEventDescription}`);
+        return;
+    }
+    // console.log(`checkAndHandleRoomDeletion: Room ${roomId} not deleted. Trigger: ${triggerEventDescription}. Empty: ${isRoomEmpty}, Host: ${room.hostId}, Pending Host: ${room.pendingHostReconnectUserId}, Users: ${room.users.length}`);
+}
 
 app.get('/room/:roomId', (req, res) => {
     const roomId = req.params.roomId;
@@ -586,6 +644,7 @@ io.on('connection', (socket) => {
         });
     }); // End of socket.on('join-room', ...)
 
+    // This is the primary disconnect handler that includes room self-deletion logic
     socket.on('disconnect', () => {
         const roomId = socket.roomId;
         const peerId = socket.peerId;
@@ -599,60 +658,68 @@ io.on('connection', (socket) => {
         }
 
         if (rooms[roomId] && peerId) {
+            const room = rooms[roomId]; // Get a reference to the room object
             const userIndex = rooms[roomId].users.findIndex(u => u.id === peerId);
             if (userIndex !== -1) {
-                const removedUser = rooms[roomId].users.splice(userIndex, 1)[0]; // Get the removed user object
-                console.log(`User ${peerId} removed from room ${roomId}`);
+                const removedUser = room.users.splice(userIndex, 1)[0]; // Get the removed user object
+                console.log(`User ${removedUser.displayName} (userId: ${disconnectedUserSessionId}) disconnected from room ${roomId}`);
 
-                if (rooms[roomId].users.length === 0 && !rooms[roomId].pendingHostReconnectUserId) {
-                    // Room is empty and no host is pending reconnection
-                    console.log(`Room ${roomId} is empty, deleting.`);
-                    if (rooms[roomId].hostReconnectTimer) clearTimeout(rooms[roomId].hostReconnectTimer); // Clear timer if any
-                    delete rooms[roomId];
-                    broadcastRoomDeletion(roomId);
-                } else if (rooms[roomId].users.length > 0 || rooms[roomId].pendingHostReconnectUserId) {
-                    if (rooms[roomId].hostId === disconnectedUserSessionId) {
-                        // Host disconnected, start grace period
-                        console.log(`Host ${disconnectedUserSessionId} disconnected from room ${roomId}. Starting grace period.`);
-                        rooms[roomId].pendingHostReconnectUserId = disconnectedUserSessionId;
-                        rooms[roomId].hostId = null; // Mark host spot as vacant but reserved
+                io.to(roomId).emit('user-disconnected', peerId);
+                io.to(roomId).emit('update-user-list', room.users.map(u => ({id: u.id, name: u.displayName, hasVideo: u.hasVideo })));
+                broadcastRoomUpdate(roomId); // Update user count on index page
 
-                        // Clear any existing timer before starting a new one
-                        if (rooms[roomId].hostReconnectTimer) {
-                            clearTimeout(rooms[roomId].hostReconnectTimer);
-                        }
+                // Determine if the disconnected user was the host
+                // This check is before hostId might be nulled for grace period
+                const wasHost = (room.hostId === disconnectedUserSessionId) || 
+                                (room.pendingHostReconnectUserId === disconnectedUserSessionId && !room.hostId); // Covers case where host disconnected and is in grace period
 
-                        rooms[roomId].hostReconnectTimer = setTimeout(() => {
-                            if (rooms[roomId] && rooms[roomId].pendingHostReconnectUserId === disconnectedUserSessionId) {
-                                // Grace period expired, original host did not reconnect
-                                console.log(`Grace period expired for host ${disconnectedUserSessionId} in room ${roomId}.`);
-                                rooms[roomId].pendingHostReconnectUserId = null;
-                                if (rooms[roomId].users.length > 0) {
-                                    const newHostUser = rooms[roomId].users[0];
-                                    rooms[roomId].hostId = newHostUser.userId;
-                                    io.to(newHostUser.socketId).emit('set-as-host');
-                                    console.log(`New host is ${newHostUser.userId} (peer: ${newHostUser.id}) in room ${roomId}`);
-                                } else {
-                                    // Room became empty during grace period (e.g. last user was host)
-                                    console.log(`Room ${roomId} is empty after host grace period, deleting.`);
-                                    delete rooms[roomId];
-                                    broadcastRoomDeletion(roomId);
-                                    return; // Exit early as room is deleted
-                                }
+                if (wasHost && room.users.length > 0) {
+                    // Host disconnected, but other users remain. Start grace period.
+                    console.log(`Host ${disconnectedUserSessionId} disconnected from room ${roomId}. Starting grace period.`);
+                    room.pendingHostReconnectUserId = disconnectedUserSessionId; // Mark who is allowed to reconnect as host
+                    room.hostId = null; // Vacate the host spot but reserve it for the pending user
+
+                    if (room.hostReconnectTimer) clearTimeout(room.hostReconnectTimer); // Clear any existing timer
+                    room.hostReconnectTimer = setTimeout(() => {
+                        if (rooms[roomId] && room.pendingHostReconnectUserId === disconnectedUserSessionId) { // Check room still exists and pending host is the same
+                            console.log(`Grace period expired for host ${disconnectedUserSessionId} in room ${roomId}.`);
+                            room.pendingHostReconnectUserId = null; // Clear pending host status
+
+                            if (room.users.length > 0) {
+                                // Attempt to assign a new host if users remain
+                                room.hostId = room.users[0].userId; // Assign to the first user in the list
+                                const newHostSocket = io.sockets.sockets.get(room.users[0].socketId);
+                                if (newHostSocket) newHostSocket.emit('set-as-host');
+                                console.log(`New host ${room.hostId} (${room.users[0].displayName}) assigned in room ${roomId}.`);
+                                io.to(roomId).emit('new-host-assigned', { hostId: room.hostId, hostDisplayName: room.users[0].displayName });
+                            } else {
+                                room.hostId = null; // Ensure hostId is null if no users left to be host
                             }
-                            rooms[roomId].hostReconnectTimer = null;
-                        }, 30000); // 30-second grace period
-                    }
-                    // Common updates whether host disconnected or regular user
-                    socket.broadcast.to(roomId).emit('user-disconnected', peerId);
-                    io.to(roomId).emit('update-user-list', rooms[roomId].users.map(u => ({id: u.id, name: u.displayName, hasVideo: u.hasVideo })));
-                    broadcastRoomUpdate(roomId);
-                    socket.broadcast.to(roomId).emit('user-disconnected', peerId);
-                    io.to(roomId).emit('update-user-list', rooms[roomId].users.map(u => ({id: u.id, name: u.displayName, hasVideo: u.hasVideo })));
-                    broadcastRoomUpdate(roomId);
+                            // After grace period logic (new host assigned or not), check for room deletion
+                            checkAndHandleRoomDeletion(roomId, `Host grace period expired for ${disconnectedUserSessionId}`);
+                        }
+                    }, HOST_RECONNECT_GRACE_PERIOD);
+                } else {
+                    // This branch covers: 
+                    // 1. Non-host disconnected.
+                    // 2. Host disconnected and room became empty simultaneously.
+                    // 3. Host disconnected, was already in grace period (pendingHostReconnectUserId matched), and now leaves again.
+                    // In all these cases, we directly check if the room should be deleted based on current state.
+                    checkAndHandleRoomDeletion(roomId, `User ${disconnectedUserSessionId} disconnected (direct check)`);
                 }
+            } else { // This 'else' corresponds to 'if (userIndex !== -1)'
+                // console.log(`User ${peerId} (userId: ${disconnectedUserSessionId}) not found in room ${roomId} user list upon disconnect.`);
             }
+        } else {
+            // console.log(`Disconnect event for socket ${socket.id}, but no valid roomId or peerId found in socket state, or room already deleted.`);
         }
+    }); // End of the primary socket.on('disconnect') handler
+
+    socket.on('request-total-active-users', () => {
+        // No need to check clientIp here for adding/removing, just for logging if desired
+        // The activeClientIPs set is managed by global connect/disconnect events
+        console.log(`Received 'request-total-active-users' from socket ${socket.id}. Sending current count: ${activeClientIPs.size}`);
+        socket.emit('total-active-users-update', activeClientIPs.size);
     });
 
     socket.on('check-admin-status', (callback) => {
